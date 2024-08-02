@@ -30,7 +30,7 @@ const authenticateToken = (req, res, next) => {
 };
 
 // Login route
-regd_users.post("/customer/login", (req, res) => {
+regd_users.post("/login", (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
@@ -41,7 +41,7 @@ regd_users.post("/customer/login", (req, res) => {
         return res.status(401).json({ error: 'Invalid username or password.' });
     }
 
-    const accessToken = jwt.sign({ data: username }, 'access', { expiresIn: 60*60 });
+    const accessToken = jwt.sign({ data: username }, 'access', { expiresIn: '1h' });
     req.session.authorization = {
         data: username,
         accessToken,
@@ -53,7 +53,7 @@ regd_users.post("/customer/login", (req, res) => {
 regd_users.put("/auth/review/:isbn", authenticateToken, (req, res) => {
     const { isbn } = req.params;
     const { review } = req.body;
-    const username = req.user.username;
+    const username = req.user.data; // Adjusted to match how data is stored in JWT
 
     if (!review) {
         return res.status(400).json({ error: 'Review content is required.' });
@@ -64,7 +64,7 @@ regd_users.put("/auth/review/:isbn", authenticateToken, (req, res) => {
         return res.status(404).json({ error: 'Book not found.' });
     }
 
-    // Update or add the review
+    // Add or update the review
     book.reviews[username] = review;
 
     res.json({ message: 'Review posted successfully.', reviews: book.reviews });
@@ -73,7 +73,7 @@ regd_users.put("/auth/review/:isbn", authenticateToken, (req, res) => {
 // Delete a book review
 regd_users.delete('/auth/review/:isbn', authenticateToken, (req, res) => {
     const { isbn } = req.params;
-    const username = req.user.username;
+    const username = req.user.data; // Adjusted to match how data is stored in JWT
 
     const book = books[isbn];
     if (!book) {
