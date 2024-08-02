@@ -14,11 +14,11 @@ app.use(session({
     secret: 'fingerprint_customer',
     resave: true,
     saveUninitialized: true,
-  
+    cookie: { secure: false },
 }));
 
 // Authentication middleware for /customer/auth/*
-app.use('/customer/auth/*', function auth(req, res, next) => {
+app.use('/customer/auth/*', (req, res, next) => {
     if (req.session.authorization && req.session.authorization.accessToken) {
         const token = req.session.authorization.accessToken;
 
